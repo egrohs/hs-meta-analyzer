@@ -1,0 +1,36 @@
+[
+  {
+    "archetype": "Reno Warrior",
+    "card_ids": [
+      "CORE_BRM_024",
+      "ETC_325",
+      "DEEP_007",
+      "TID_712",
+      "ONY_023",
+      "NX2_023",
+      "RLK_822"
+    ]
+  },
+  {
+    "archetype": "Shopper Demon Hunter",
+    "card_ids": [
+      "TOY_640",
+      "JAM_014",
+      "DEEP_012",
+      "MAW_014",
+      "ETC_400",
+      "GIFT_01"
+    ]
+  },
+  {
+    "archetype": "Zarroco Paladin",
+    "card_ids": [
+      "TOY_825",
+      "TOY_822",
+      "TOY_826",
+      "DEEP_015",
+      "WW_346",
+      "JAM_026"
+    ]
+  }
+]
