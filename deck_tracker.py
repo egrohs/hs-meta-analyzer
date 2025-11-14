@@ -1,16 +1,13 @@
 import os
 import sys
-print("Executando com:")
-print(sys.executable)
-
 import json
-import time
+import traceback
 from pathlib import Path
 
 import tailer
 from hslog import LogParser
 from hslog.export import EntityTreeExporter
-from hearthstone.enums import GameTag, Zone
+from hslog.exceptions import InconsistentPlayerIdError
 
 # --- CONFIGURAÇÃO ---
 HEARTHSTONE_LOGS_DIR_WINDOWS = "C:\\Program Files (x86)\\Hearthstone\\Logs"
@@ -27,6 +24,7 @@ class DeckTracker:
         self.parser = LogParser()
         self.opponent_played_cards = set()
         self.meta_decks = self._load_meta_decks(decks_db_path)
+        self.game_id = 0 # Para rastrear o jogo atual
         self.last_known_archetype = "Desconhecido"
 
     def _load_meta_decks(self, filepath):
@@ -68,24 +66,35 @@ class DeckTracker:
 
     def _process_log_line(self, line):
         """Processa uma única linha do log."""
-        self.parser.read_line(line)
-        
-        # Garante que temos um jogo completo para analisar
-        if not self.parser.games or not self.parser.games[-1].game:
+        try:
+            self.parser.read_line(line)
+        except InconsistentPlayerIdError:
+            # Ignora erros de ID de jogador inconsistente, que podem ocorrer em
+            # reconexões e não são críticos para a análise do deck.
             return
 
-        exporter = EntityTreeExporter(self.parser.games[-1])
+        # Se não houver jogos no parser, não há nada a fazer.
+        if not self.parser.games:
+            return
+
+        # Pega o jogo mais recente que o parser encontrou.
+        current_game_tree = self.parser.games[-1]
+        exporter = EntityTreeExporter(current_game_tree)
         game = exporter.export()
 
-        opponent = next((p for p in game.players if not p.is_main_player), None)
+        # Se um novo jogo começou (e já temos um ID para ele), reinicia o estado.
+        if hasattr(game, 'id') and game.id != self.game_id:
+            print("\n--- Nova Partida Detectada ---")
+            self.game_id = game.id
+            self.opponent_played_cards.clear()
+            self.last_known_archetype = "Desconhecido"
+
+        opponent = next((p for p in getattr(game, 'players', []) if not p.is_main_player), None)
         if not opponent:
             return
-
-        for entity in game.entities:
-            is_card = entity.card_id is not None
-            is_played_by_opponent = entity.controller == opponent.player_id
-            is_in_play_zone = entity.zone == Zone.PLAY
-            is_new_card = entity.card_id not in self.opponent_played_cards
+        # Itera sobre as entidades que mudaram no último pacote de dados lido
+        for entity in current_game_tree.games[-1].entities:
+            is_card, is_played_by_opponent, is_in_play_zone, is_new_card = self._check_entity_conditions(entity, opponent.player_id)
 
             if is_card and is_played_by_opponent and is_in_play_zone and is_new_card:
                 self.opponent_played_cards.add(entity.card_id)
@@ -98,15 +107,29 @@ class DeckTracker:
         
         try:
             with open(self.log_path, "r", encoding="utf-8") as log_file:
-                # Pula para o final do arquivo para não processar jogos antigos
-                log_file.seek(0, 2)
-                
+                # 1. Processa todo o conteúdo que já existe no arquivo
+                print("Analisando o histórico do log da sessão atual...")
+                for line in log_file:
+                    print(f"Processando linha: {line.strip()}")
+                    self._process_log_line(line)
+
+                # 2. Agora, monitora novas linhas em tempo real de forma eficiente
+                print("\nAnálise do histórico concluída. Monitorando em tempo real... (Ctrl+C para sair)")
                 for line in tailer.follow(log_file):
                     self._process_log_line(line)
         except KeyboardInterrupt:
             print("\nMonitoramento interrompido pelo usuário.")
         except Exception as e:
-            print(f"\nOcorreu um erro: {e}")
+            print("\nOcorreu um erro inesperado. Detalhes abaixo:")
+            traceback.print_exc()
+
+    def _check_entity_conditions(self, entity, opponent_id):
+        """Verifica as condições de uma entidade para ser contada como 'jogada pelo oponente'."""
+        is_card = entity.card_id is not None
+        is_played_by_opponent = entity.controller == opponent_id
+        # Garante que a carta foi para a zona de JOGO (não para a mão ou cemitério)
+        is_in_play_zone = hasattr(entity, 'zone') and entity.zone == Zone.PLAY
+        is_new_card = entity.card_id not in self.opponent_played_cards
 
 def get_log_path():
     """
@@ -118,8 +141,10 @@ def get_log_path():
     elif sys.platform == "darwin": # macOS
         base_dir = HEARTHSTONE_LOGS_DIR_MACOS
     else:
+        print("TODO Tratar o linux")
         print("Plataforma não suportada automaticamente. Por favor, edite o caminho do log no script.")
-        return None
+        return "Power.log"
+        # return None
 
     if not base_dir.exists():
         return None
