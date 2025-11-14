@@ -86,14 +86,25 @@ class DeckTracker:
         opponent = next((p for p in getattr(game, 'players', []) if not p.is_main_player), None)
         if not opponent:
             return
-        # Itera sobre as entidades que mudaram no último pacote de dados lido
-        for entity in current_game_tree.games[-1].entities:
-            is_card, is_played_by_opponent, is_in_play_zone, is_new_card = self._check_entity_conditions(entity, opponent.player_id)
 
-            if is_card and is_played_by_opponent and is_in_play_zone and is_new_card:
-                self.opponent_played_cards.add(entity.card_id)
-                print(f"Oponente jogou: {entity.card_id}")
-                self._determine_meta_deck()
+        # Itera sobre as mudanças de tags para detectar cartas sendo jogadas
+        for packet in self.parser.packets:
+            if isinstance(packet, TagChange) and packet.tag == Tag.ZONE and packet.value == Zone.PLAY:
+                entity = current_game_tree.find_entity(packet.entity)
+                if not entity or not entity.card_id:
+                    continue
+
+                # Verifica se a carta pertence ao oponente
+                if entity.controller == opponent.player_id:
+                    # Busca o dbfId da carta
+                    card_data, _ = card_db_by_id().get(entity.card_id, (None, None))
+                    dbf_id = str(getattr(card_data, 'dbf_id', None))
+
+                    # Adiciona o dbfId ao conjunto de cartas jogadas, se for novo
+                    if dbf_id and dbf_id not in self.opponent_played_cards:
+                        self.opponent_played_cards.add(dbf_id)
+                        print(f"Oponente jogou: {getattr(card_data, 'name', entity.card_id)} (ID: {dbf_id})")
+                        self._determine_meta_deck()
 
     def run(self):
         """Inicia o monitoramento do arquivo de log."""

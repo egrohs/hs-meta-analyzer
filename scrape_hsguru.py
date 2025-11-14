@@ -1,10 +1,21 @@
 import json
 import requests
+import time
 from bs4 import BeautifulSoup
+from selenium import webdriver
+from selenium.webdriver.chrome.service import Service as ChromeService
+from webdriver_manager.chrome import ChromeDriverManager
+from selenium.webdriver.common.by import By
 
 # --- CONFIGURAÇÃO ---
-HSGURU_META_URL = "https://www.hsguru.com/meta?format=1" # format=1 é o modo Padrão (Standard)
+HSGURU_META_URL = "https://www.hsguru.com/decks?format=1" #"https://www.hsguru.com/meta?format=1" # format=1 é o modo Wild
+OUTPUT_FILE = "meta_decks2.json"
+HSGURU_META_URL = "https://www.hsguru.com/decks?format=1" # format=1 é o modo Padrão (Standard)
 OUTPUT_FILE = "meta_decks.json"
+
+# Configurações do Selenium
+SCROLL_PAUSE_TIME = 2  # Tempo de espera para o conteúdo carregar após cada rolagem
+SCROLL_ATTEMPTS = 10   # Quantas vezes o script tentará rolar para baixo
 
 def scrape_meta_decks():
     """
@@ -30,25 +41,27 @@ def scrape_meta_decks():
     meta_decks = []
 
     # Encontra todos os containers de deck na página
-    deck_containers = soup.find_all("div", class_="deck-container")
+    # O seletor foi atualizado para corresponder à nova estrutura do site (Dez/2023)
+    deck_containers = soup.select("div[id^='deck_stats-']")
 
     if not deck_containers:
         print("AVISO: Nenhum container de deck encontrado na página. O layout do site pode ter mudado.")
         return []
 
     print(f"Encontrados {len(deck_containers)} decks no meta.")
-
+    
     for container in deck_containers:
         # Extrai o nome do arquétipo
-        archetype_element = container.find("h5", class_="deck-archetype")
+        archetype_element = container.select_one("h2.deck-title a")
         if not archetype_element:
             continue # Pula se não encontrar o nome do arquétipo
 
         archetype = archetype_element.get_text(strip=True)
-
+        
         # Extrai os IDs das cartas (dbfId)
-        card_elements = container.select(".deck-list-card a")
-        card_ids = [card.get("data-dbfid") for card in card_elements if card.get("data-dbfid")]
+        # O seletor agora busca por 'phx-value-card_id' e exclui cartas de sideboard
+        card_elements = container.select("div[phx-value-card_id]:not([phx-value-sideboard])")
+        card_ids = [card.get("phx-value-card_id") for card in card_elements]
 
         if archetype and card_ids:
             meta_decks.append({
