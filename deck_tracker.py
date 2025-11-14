@@ -7,7 +7,6 @@ from pathlib import Path
 import tailer
 from hslog import LogParser
 from hslog.export import EntityTreeExporter
-from hslog.exceptions import InconsistentPlayerIdError
 
 # --- CONFIGURAÇÃO ---
 HEARTHSTONE_LOGS_DIR_WINDOWS = "C:\\Program Files (x86)\\Hearthstone\\Logs"
@@ -66,12 +65,7 @@ class DeckTracker:
 
     def _process_log_line(self, line):
         """Processa uma única linha do log."""
-        try:
-            self.parser.read_line(line)
-        except InconsistentPlayerIdError:
-            # Ignora erros de ID de jogador inconsistente, que podem ocorrer em
-            # reconexões e não são críticos para a análise do deck.
-            return
+        self.parser.read_line(line)
 
         # Se não houver jogos no parser, não há nada a fazer.
         if not self.parser.games:
@@ -110,7 +104,7 @@ class DeckTracker:
                 # 1. Processa todo o conteúdo que já existe no arquivo
                 print("Analisando o histórico do log da sessão atual...")
                 for line in log_file:
-                    print(f"Processando linha: {line.strip()}")
+                    #print(f"Processando linha: {line.strip()}")
                     self._process_log_line(line)
 
                 # 2. Agora, monitora novas linhas em tempo real de forma eficiente
@@ -143,7 +137,7 @@ def get_log_path():
     else:
         print("TODO Tratar o linux")
         print("Plataforma não suportada automaticamente. Por favor, edite o caminho do log no script.")
-        return "Power.log"
+        return "./Power.log"
         # return None
 
     if not base_dir.exists():

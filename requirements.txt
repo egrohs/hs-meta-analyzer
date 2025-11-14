@@ -1,3 +1,4 @@
-hearthstone
+hearthstone>=5.0.0
 tailer
-hslog
+requests
+beautifulsoup4
