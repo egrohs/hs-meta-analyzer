@@ -1,17 +1,20 @@
 import os
 import sys
+print("Executando com:")
+print(sys.executable)
+
 import json
 import time
 from pathlib import Path
 
 import tailer
+from hslog import LogParser
+from hslog.export import EntityTreeExporter
 from hearthstone.enums import GameTag, Zone
-from hearthstone.hslog import LogParser
-from hearthstone.hslog.export import EntityTreeExporter
 
 # --- CONFIGURAÇÃO ---
-HEARTHSTONE_LOG_PATH_WINDOWS = "C:\\Program Files (x86)\\Hearthstone\\Logs\\Power.log"
-HEARTHSTONE_LOG_PATH_MACOS = Path.home() / "Library/Preferences/Blizzard/Hearthstone/Logs/Power.log"
+HEARTHSTONE_LOGS_DIR_WINDOWS = "C:\\Program Files (x86)\\Hearthstone\\Logs"
+HEARTHSTONE_LOGS_DIR_MACOS = Path.home() / "Library/Preferences/Blizzard/Hearthstone/Logs"
 META_DECKS_DB_PATH = "meta_decks.json"
 MINIMUM_MATCH_CONFIDENCE = 2 # Mínimo de cartas correspondentes para sugerir um arquétipo
 
@@ -106,14 +109,28 @@ class DeckTracker:
             print(f"\nOcorreu um erro: {e}")
 
 def get_log_path():
-    """Retorna o caminho do log do Hearthstone com base no SO."""
+    """
+    Encontra e retorna o caminho para o arquivo Power.log mais recente,
+    baseado no sistema operacional.
+    """
     if sys.platform == "win32":
-        return HEARTHSTONE_LOG_PATH_WINDOWS
+        base_dir = Path(HEARTHSTONE_LOGS_DIR_WINDOWS)
     elif sys.platform == "darwin": # macOS
-        return HEARTHSTONE_LOG_PATH_MACOS
+        base_dir = HEARTHSTONE_LOGS_DIR_MACOS
     else:
-        # Para Linux, o caminho pode variar. O usuário pode precisar especificar.
         print("Plataforma não suportada automaticamente. Por favor, edite o caminho do log no script.")
+        return None
+
+    if not base_dir.exists():
+        return None
+
+    # Encontra a pasta de log mais recente dentro do diretório base
+    try:
+        latest_log_dir = max([d for d in base_dir.iterdir() if d.is_dir()], key=os.path.getmtime)
+        log_file = latest_log_dir / "Power.log"
+        return log_file
+    except (ValueError, FileNotFoundError):
+        # Pode acontecer se a pasta Logs estiver vazia ou não tiver subdiretórios
         return None
 
 def main():
