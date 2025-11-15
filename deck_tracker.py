@@ -7,6 +7,9 @@ from pathlib import Path
 import tailer
 from hslog import LogParser
 from hslog.export import EntityTreeExporter
+from hearthstone import cardxml
+from hslog.packets import TagChange, CreateGame, FullEntity
+from hearthstone.entities import Game
 
 # --- CONFIGURAÇÃO ---
 HEARTHSTONE_LOGS_DIR_WINDOWS = "C:\\Program Files (x86)\\Hearthstone\\Logs"
@@ -22,6 +25,7 @@ class DeckTracker:
         self.log_path = log_path
         self.parser = LogParser()
         self.opponent_played_cards = set()
+        self.db, self.dbf_id_to_name = self._load_card_database()
         self.meta_decks = self._load_meta_decks(decks_db_path)
         self.game_id = 0 # Para rastrear o jogo atual
         self.last_known_archetype = "Desconhecido"
@@ -39,10 +43,20 @@ class DeckTracker:
             print(f"ERRO: Arquivo de decks '{filepath}' contém um JSON inválido.")
             sys.exit(1)
 
+    def _load_card_database(self):
+        """Carrega o banco de dados de cartas e cria um mapa de dbfId para nome."""
+        db, _ = cardxml.load_dbf()
+        mapping = {}
+        for card_data in db.values():
+            if hasattr(card_data, 'dbf_id') and hasattr(card_data, 'name'):
+                mapping[str(card_data.dbf_id)] = card_data.name
+        return db, mapping
+
     def _determine_meta_deck(self):
         """Compara as cartas jogadas com os decks meta e retorna o mais provável."""
         best_match_archetype = "Desconhecido"
         highest_score = -1
+        best_matching_cards = set()
 
         for deck in self.meta_decks:
             deck_cards = set(deck.get("card_ids", []))
@@ -52,13 +66,20 @@ class DeckTracker:
             if score > highest_score:
                 highest_score = score
                 best_match_archetype = deck.get("archetype", "Arquétipo Sem Nome")
+                best_matching_cards = matches
 
         if highest_score > MINIMUM_MATCH_CONFIDENCE:
             if best_match_archetype != self.last_known_archetype:
                 self.last_known_archetype = best_match_archetype
                 print("\n" + "="*40)
                 print(f"==> Deck do Oponente: {best_match_archetype}")
-                print(f"    (Confiança baseada em {highest_score} cartas correspondentes)")
+                print(f"    (Confiança baseada em {highest_score} cartas correspondentes):")
+                
+                # Imprime os nomes das cartas que deram match
+                for card_dbf_id in sorted(list(best_matching_cards)):
+                    card_name = self.dbf_id_to_name.get(card_dbf_id, f"ID:{card_dbf_id}")
+                    print(f"      - {card_name}")
+
                 print("="*40 + "\n")
         
         return best_match_archetype
@@ -67,40 +88,53 @@ class DeckTracker:
         """Processa uma única linha do log."""
         self.parser.read_line(line)
 
-        # Se não houver jogos no parser, não há nada a fazer.
         if not self.parser.games:
             return
 
-        # Pega o jogo mais recente que o parser encontrou.
         current_game_tree = self.parser.games[-1]
-        exporter = EntityTreeExporter(current_game_tree)
-        game = exporter.export()
 
-        # Se um novo jogo começou (e já temos um ID para ele), reinicia o estado.
-        if hasattr(game, 'id') and game.id != self.game_id:
+        # Encontra o pacote CreateGame para obter a entidade do jogo de forma robusta.
+        # Isso é necessário para contornar as falhas de atributo em diferentes versões do hslog.
+        game_entity = None
+        for packet in current_game_tree:
+            if isinstance(packet, CreateGame):
+                for sub_packet in packet.packets:
+                    if isinstance(sub_packet, FullEntity):
+                        if sub_packet.tags.get(Game.Tag.GAME_ENTITY) == 1:
+                            game_entity = sub_packet
+                            break
+                if game_entity:
+                    break
+        
+        if not game_entity:
+            return # Pacote CreateGame ainda não foi encontrado
+
+        current_game_id = game_entity.id
+        if current_game_id != self.game_id:
             print("\n--- Nova Partida Detectada ---")
-            self.game_id = game.id
+            self.game_id = current_game_id
             self.opponent_played_cards.clear()
             self.last_known_archetype = "Desconhecido"
 
-        opponent = next((p for p in getattr(game, 'players', []) if not p.is_main_player), None)
+        exporter = EntityTreeExporter(current_game_tree)
+        game = exporter.export()
+
+        if not game:
+            return
+
+        opponent = next((p for p in game.players if not p.is_main_player), None)
         if not opponent:
             return
 
-        # Itera sobre as mudanças de tags para detectar cartas sendo jogadas
-        for packet in self.parser.packets:
-            if isinstance(packet, TagChange) and packet.tag == Tag.ZONE and packet.value == Zone.PLAY:
+        for packet in self.parser.flush():
+            if isinstance(packet, TagChange) and packet.tag == Game.Tag.ZONE and packet.value == Game.Zone.PLAY:
                 entity = current_game_tree.find_entity(packet.entity)
                 if not entity or not entity.card_id:
                     continue
-
-                # Verifica se a carta pertence ao oponente
                 if entity.controller == opponent.player_id:
-                    # Busca o dbfId da carta
-                    card_data, _ = card_db_by_id().get(entity.card_id, (None, None))
+                    card_data = self.db.get(entity.card_id)
                     dbf_id = str(getattr(card_data, 'dbf_id', None))
 
-                    # Adiciona o dbfId ao conjunto de cartas jogadas, se for novo
                     if dbf_id and dbf_id not in self.opponent_played_cards:
                         self.opponent_played_cards.add(dbf_id)
                         print(f"Oponente jogou: {getattr(card_data, 'name', entity.card_id)} (ID: {dbf_id})")
@@ -128,14 +162,6 @@ class DeckTracker:
             print("\nOcorreu um erro inesperado. Detalhes abaixo:")
             traceback.print_exc()
 
-    def _check_entity_conditions(self, entity, opponent_id):
-        """Verifica as condições de uma entidade para ser contada como 'jogada pelo oponente'."""
-        is_card = entity.card_id is not None
-        is_played_by_opponent = entity.controller == opponent_id
-        # Garante que a carta foi para a zona de JOGO (não para a mão ou cemitério)
-        is_in_play_zone = hasattr(entity, 'zone') and entity.zone == Zone.PLAY
-        is_new_card = entity.card_id not in self.opponent_played_cards
-
 def get_log_path():
     """
     Encontra e retorna o caminho para o arquivo Power.log mais recente,
@@ -145,11 +171,11 @@ def get_log_path():
         base_dir = Path(HEARTHSTONE_LOGS_DIR_WINDOWS)
     elif sys.platform == "darwin": # macOS
         base_dir = HEARTHSTONE_LOGS_DIR_MACOS
-    else:
-        print("TODO Tratar o linux")
-        print("Plataforma não suportada automaticamente. Por favor, edite o caminho do log no script.")
+    elif sys.platform == "linux":
         return "./Power.log"
-        # return None
+    else:
+        print("Plataforma não suportada automaticamente. Por favor, edite o caminho do log no script.")
+        return None
 
     if not base_dir.exists():
         return None

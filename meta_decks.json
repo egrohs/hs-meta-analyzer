@@ -1,5 +1,11 @@
 [
   {
+    "archetype": "Teste",
+    "card_ids": [
+      "30"
+    ]
+  },
+  {
     "archetype": "Reno Warrior",
     "card_ids": [
       "CORE_BRM_024",

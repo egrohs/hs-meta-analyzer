@@ -1,5 +1,4 @@
 import json
-import requests
 import time
 from bs4 import BeautifulSoup
 from selenium import webdriver
@@ -8,8 +7,6 @@ from webdriver_manager.chrome import ChromeDriverManager
 from selenium.webdriver.common.by import By
 
 # --- CONFIGURAÇÃO ---
-HSGURU_META_URL = "https://www.hsguru.com/decks?format=1" #"https://www.hsguru.com/meta?format=1" # format=1 é o modo Wild
-OUTPUT_FILE = "meta_decks2.json"
 HSGURU_META_URL = "https://www.hsguru.com/decks?format=1" # format=1 é o modo Padrão (Standard)
 OUTPUT_FILE = "meta_decks.json"
 

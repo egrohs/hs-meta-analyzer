@@ -1,4 +1,7 @@
 hearthstone>=5.0.0
+hslog>=1.18.0
 tailer
 requests
 beautifulsoup4
+selenium
+webdriver-manager
