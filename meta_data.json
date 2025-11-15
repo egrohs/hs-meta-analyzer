@@ -1,0 +1,298 @@
+[
+    {
+        "archetype": "Egg Warlock",
+        "winrate": 63.9,
+        "popularity": "1.7% (2598)",
+        "turns": 6.0,
+        "duration": 5.0,
+        "climbing_speed": "3.36⭐/h"
+    },
+    {
+        "archetype": "Pirate DH",
+        "winrate": 60.9,
+        "popularity": "1.6% (2488)",
+        "turns": 5.9,
+        "duration": 4.6,
+        "climbing_speed": "2.85⭐/h"
+    },
+    {
+        "archetype": "XL Seedlock",
+        "winrate": 60.9,
+        "popularity": "2.0% (3179)",
+        "turns": 7.4,
+        "duration": 6.9,
+        "climbing_speed": "1.88⭐/h"
+    },
+    {
+        "archetype": "XL HL Leoroxx Hunter",
+        "winrate": 60.3,
+        "popularity": "5.9% (9118)",
+        "turns": 8.3,
+        "duration": 7.0,
+        "climbing_speed": "1.77⭐/h"
+    },
+    {
+        "archetype": "Lynessa Libram Paladin",
+        "winrate": 60.3,
+        "popularity": "2.1% (3319)",
+        "turns": 6.6,
+        "duration": 5.5,
+        "climbing_speed": "2.26⭐/h"
+    },
+    {
+        "archetype": "XL Highlander Hunter",
+        "winrate": 60.0,
+        "popularity": "2.0% (3075)",
+        "turns": 8.4,
+        "duration": 7.3,
+        "climbing_speed": "1.66⭐/h"
+    },
+    {
+        "archetype": "Big Shaman",
+        "winrate": 59.2,
+        "popularity": "0.7% (1075)",
+        "turns": 6.4,
+        "duration": 4.9,
+        "climbing_speed": "2.26⭐/h"
+    },
+    {
+        "archetype": "XL HL Dragon Druid",
+        "winrate": 59.1,
+        "popularity": "1.4% (2252)",
+        "turns": 9.2,
+        "duration": 8.6,
+        "climbing_speed": "1.28⭐/h"
+    },
+    {
+        "archetype": "Broxigar DH",
+        "winrate": 58.8,
+        "popularity": "4.7% (7334)",
+        "turns": 6.7,
+        "duration": 6.8,
+        "climbing_speed": "1.57⭐/h"
+    },
+    {
+        "archetype": "XL Demon Boarlock",
+        "winrate": 58.2,
+        "popularity": "2.5% (3945)",
+        "turns": 7.7,
+        "duration": 5.9,
+        "climbing_speed": "1.67⭐/h"
+    },
+    {
+        "archetype": "XL HL Hostage Mage",
+        "winrate": 58.0,
+        "popularity": "0.8% (1247)",
+        "turns": 10.8,
+        "duration": 9.8,
+        "climbing_speed": "0.98⭐/h"
+    },
+    {
+        "archetype": "Boarlock",
+        "winrate": 57.9,
+        "popularity": "1.8% (2738)",
+        "turns": 6.1,
+        "duration": 4.5,
+        "climbing_speed": "2.1⭐/h"
+    },
+    {
+        "archetype": "XL Dungar Druid",
+        "winrate": 57.4,
+        "popularity": "1.1% (1724)",
+        "turns": 6.4,
+        "duration": 5.3,
+        "climbing_speed": "1.69⭐/h"
+    },
+    {
+        "archetype": "Nazmani Priest",
+        "winrate": 57.3,
+        "popularity": "4.4% (6824)",
+        "turns": 5.4,
+        "duration": 4.4,
+        "climbing_speed": "2.01⭐/h"
+    },
+    {
+        "archetype": "XL HL Shadow Priest",
+        "winrate": 57.1,
+        "popularity": "3.8% (5952)",
+        "turns": 9.4,
+        "duration": 8.6,
+        "climbing_speed": "0.99⭐/h"
+    },
+    {
+        "archetype": "Discolock",
+        "winrate": 57.0,
+        "popularity": "1.3% (2001)",
+        "turns": 5.8,
+        "duration": 4.6,
+        "climbing_speed": "1.83⭐/h"
+    },
+    {
+        "archetype": "Astral Communion Druid",
+        "winrate": 56.9,
+        "popularity": "9.9% (15372)",
+        "turns": 6.5,
+        "duration": 5.6,
+        "climbing_speed": "1.47⭐/h"
+    },
+    {
+        "archetype": "XL Highlander Shaman",
+        "winrate": 56.4,
+        "popularity": "2.0% (3082)",
+        "turns": 9.4,
+        "duration": 8.0,
+        "climbing_speed": "0.95⭐/h"
+    },
+    {
+        "archetype": "XL HL Exodia Mage",
+        "winrate": 55.6,
+        "popularity": "1.0% (1490)",
+        "turns": 9.9,
+        "duration": 9.5,
+        "climbing_speed": "0.71⭐/h"
+    },
+    {
+        "archetype": "XL Hostage Mage",
+        "winrate": 55.4,
+        "popularity": "3.0% (4605)",
+        "turns": 11.1,
+        "duration": 10.2,
+        "climbing_speed": "0.63⭐/h"
+    },
+    {
+        "archetype": "Barnes Druid",
+        "winrate": 55.3,
+        "popularity": "2.3% (3590)",
+        "turns": 4.9,
+        "duration": 3.7,
+        "climbing_speed": "1.72⭐/h"
+    },
+    {
+        "archetype": "Highlander Rogue",
+        "winrate": 55.3,
+        "popularity": "3.7% (5821)",
+        "turns": 6.9,
+        "duration": 6.2,
+        "climbing_speed": "1.01⭐/h"
+    },
+    {
+        "archetype": "XL Highlander Warrior",
+        "winrate": 55.1,
+        "popularity": "2.6% (4080)",
+        "turns": 10.5,
+        "duration": 9.6,
+        "climbing_speed": "0.65⭐/h"
+    },
+    {
+        "archetype": "XL HL Thief Priest",
+        "winrate": 55.0,
+        "popularity": "3.5% (5503)",
+        "turns": 9.7,
+        "duration": 9.4,
+        "climbing_speed": "0.64⭐/h"
+    },
+    {
+        "archetype": "XL Champions Druid",
+        "winrate": 54.9,
+        "popularity": "0.8% (1269)",
+        "turns": 7.2,
+        "duration": 6.5,
+        "climbing_speed": "0.92⭐/h"
+    },
+    {
+        "archetype": "Quasar Rogue",
+        "winrate": 54.4,
+        "popularity": "1.0% (1624)",
+        "turns": 5.1,
+        "duration": 3.9,
+        "climbing_speed": "1.36⭐/h"
+    },
+    {
+        "archetype": "Odyn Warrior",
+        "winrate": 54.1,
+        "popularity": "0.9% (1435)",
+        "turns": 8.8,
+        "duration": 7.5,
+        "climbing_speed": "0.67⭐/h"
+    },
+    {
+        "archetype": "XL HL Exodia Paladin",
+        "winrate": 53.6,
+        "popularity": "0.9% (1352)",
+        "turns": 9.2,
+        "duration": 8.2,
+        "climbing_speed": "0.53⭐/h"
+    },
+    {
+        "archetype": "Shadow Priest",
+        "winrate": 53.2,
+        "popularity": "1.0% (1588)",
+        "turns": 6.0,
+        "duration": 4.8,
+        "climbing_speed": "0.8⭐/h"
+    },
+    {
+        "archetype": "XL HL LC Quest Warrior",
+        "winrate": 52.8,
+        "popularity": "0.9% (1447)",
+        "turns": 10.4,
+        "duration": 9.5,
+        "climbing_speed": "0.35⭐/h"
+    },
+    {
+        "archetype": "XL Mill Druid",
+        "winrate": 52.7,
+        "popularity": "1.8% (2837)",
+        "turns": 9.4,
+        "duration": 9.0,
+        "climbing_speed": "0.36⭐/h"
+    },
+    {
+        "archetype": "Pirate Rogue",
+        "winrate": 52.3,
+        "popularity": "0.9% (1345)",
+        "turns": 5.7,
+        "duration": 4.6,
+        "climbing_speed": "0.59⭐/h"
+    },
+    {
+        "archetype": "Miracle Rogue",
+        "winrate": 51.8,
+        "popularity": "1.9% (2969)",
+        "turns": 5.8,
+        "duration": 5.3,
+        "climbing_speed": "0.41⭐/h"
+    },
+    {
+        "archetype": "XL Highlander Druid",
+        "winrate": 50.9,
+        "popularity": "1.0% (1565)",
+        "turns": 9.2,
+        "duration": 8.7,
+        "climbing_speed": "0.13⭐/h"
+    },
+    {
+        "archetype": "XL Highlander Warlock",
+        "winrate": 50.4,
+        "popularity": "1.2% (1943)",
+        "turns": 9.6,
+        "duration": 8.2,
+        "climbing_speed": "0.06⭐/h"
+    },
+    {
+        "archetype": "XL HL Thief Rogue",
+        "winrate": 49.1,
+        "popularity": "0.9% (1393)",
+        "turns": 9.5,
+        "duration": 9.4,
+        "climbing_speed": "-0.11⭐/h"
+    },
+    {
+        "archetype": "XL HL Questline Priest",
+        "winrate": 49.1,
+        "popularity": "0.7% (1104)",
+        "turns": 10.0,
+        "duration": 9.6,
+        "climbing_speed": "-0.11⭐/h"
+    }
+]
